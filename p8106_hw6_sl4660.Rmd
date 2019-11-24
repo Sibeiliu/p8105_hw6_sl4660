@@ -64,3 +64,48 @@ add_child_weight=child_weight %>%
  geom_hline(yintercept = 0,col = "red",linetype = "dashed")
 ```
 
+The residual is bouncing around the y=0 line, meaning with conatant variance, which indicates the model is reaonable.
+
+## Compare my model to two others:
+
+```{r}
+cv_df = 
+  crossv_mc(child_weight, 100)
+```
+
+```{r}
+cv_df2 =
+  cv_df %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble))
+
+cv_df3 = 
+  cv_df2 %>% 
+  mutate(rm1_mod  = map(train, ~lm(bwt~babysex+bhead+blength+delwt+gaweeks+mrace+parity+smoken, data = .x)),
+         rm2_mod  = map(train, ~lm(bwt~blength+gaweeks, data = .x)),
+         rm3_mod  = map(train, ~lm(bwt~bhead*blength*babysex, data = .x))) %>% 
+  mutate(rmse_rm1 = map2_dbl(rm1_mod , test, ~rmse(model = .x, data = .y)),
+         rmse_rm2 = map2_dbl(rm2_mod , test, ~rmse(model = .x, data = .y)),
+         rmse_rm3 = map2_dbl(rm3_mod, test, ~rmse(model = .x, data = .y)))
+```
+
+```{r}
+cv_df4=cv_df3 %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") 
+
+  cv_df5=mutate(cv_df4,
+         model = fct_reorder(model,rmse))
+    ggplot(cv_df5,aes(x = model, y = rmse)) + geom_violin()
+    
+  cv_df5 %>% 
+    group_by(model) %>% 
+    summarise(mean_rmse=mean(rmse))
+```
+
+The smaller rmse is, the better the model is. So the first model I created using babysex, bhead,blength,delwt,gaweeks,mrace, parity,smoken is better. We also can read the mean of rmse in each model above. 
