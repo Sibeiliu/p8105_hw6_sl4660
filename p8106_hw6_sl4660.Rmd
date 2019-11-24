@@ -151,4 +151,16 @@ bootsrap_results=boot_straps %>%
   select(adj.r.squared) 
 ```
 
+```{r}
+ggplot(bootsrap_results,aes(x = adj.r.squared)) + geom_density()
+```
+
+The distributio of adj.r.squared is almost normal
+
+```{r}
+lower_limit=quantile(bootsrap_results$adj.r.squared,probs=0.025)
+higher_limit=quantile(bootsrap_results$adj.r.squared,probs=0.975)
+```
+
+So the 95% confidence interval of adjusted ${\widehat r}^{2}$ is (`r lower_limit`,`r higher_limit`)
 
