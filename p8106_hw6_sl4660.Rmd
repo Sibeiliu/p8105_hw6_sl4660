@@ -124,3 +124,31 @@ weather_df =
     tmax = tmax / 10) %>%
   select(name, id, everything())
 ```
+
+```{r}
+boot_sample = function(df) {
+  sample_frac(df,size=1, replace = TRUE)
+}
+```
+
+
+```{r}
+boot_straps = 
+  data_frame(
+    strap_number = 1:5000,
+    strap_sample = rerun(5000, boot_sample(weather_df))
+  )
+```
+
+```{r}
+bootsrap_results=boot_straps %>% 
+  mutate(
+    models = map(strap_sample, ~lm(tmax~tmin,data=.x)),
+    results=map(models,broom::glance)
+    )%>% 
+  select(-strap_sample,-models) %>% 
+  unnest(results) %>% 
+  select(adj.r.squared) 
+```
+
+
