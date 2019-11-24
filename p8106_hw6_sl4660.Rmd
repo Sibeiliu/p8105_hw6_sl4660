@@ -164,3 +164,40 @@ higher_limit=quantile(bootsrap_results$adj.r.squared,probs=0.975)
 
 So the 95% confidence interval of adjusted ${\widehat r}^{2}$ is (`r lower_limit`,`r higher_limit`)
 
+
+```{r}
+compute_logbeta = function(df) {
+    log(df[1,2]*df[2,2]) %>% 
+      tibble() %>% 
+    mutate(
+      logbeta=.$estimate
+    ) %>% 
+    select(logbeta)
+}
+```
+
+```{r}
+bootsrap_results2=boot_straps %>% 
+  mutate(
+    models = map(strap_sample, ~lm(tmax~tmin,data=.x)),
+    results=map(models,broom::tidy),
+    logbeta=map(results,compute_logbeta)
+    )
+
+result3=select(bootsrap_results2,-strap_sample,-models,-results) %>% 
+  unnest(logbeta)
+```
+
+```{r}
+ggplot(result3,aes(x =logbeta)) + geom_density()
+```
+
+The distributio of $\log_(\beta_0 \times \beta_1)$is almost normal
+
+```{r}
+lower_limit1=quantile(result3$logbeta,probs=0.025)
+higher_limit2=quantile(result3$logbeta,probs=0.975)
+```
+
+So the 95% confidence interval of adjusted $log(\widehat \beta_0\times\widehat \beta_1)$ is (`r lower_limit1`,`r higher_limit2`)
+
