@@ -47,4 +47,20 @@ summary(rm1_1)
 We find all variables in this model is significant.
 That is what I will use.
 
+## The plot of model residual
+
+```{r}
+add_child_weight=child_weight %>% 
+  add_predictions(rm1_1) %>% 
+  add_residuals (rm1_1) 
+
+  ggplot(add_child_weight,aes(x = pred, y = resid)) + 
+    geom_point(alpha = 0.3) +
+  labs(
+        title = " Residuals vs. Predicted Values",
+        x = "Predicted Birthweight (g)",
+        y = "Residuals"
+      )+
+ geom_hline(yintercept = 0,col = "red",linetype = "dashed")
+```
 
