@@ -30,3 +30,21 @@ child_weight=read_csv("./data/birthweight.csv") %>%
  malform=factor(malform,levels=c(0,1),labels=c("absent","present"))
 )
 ```
+
+## Let's build a model
+Here is my model building process
+First add all variables into the model(like backward method)
+```{r}
+rm1=lm(bwt~.,data=child_weight)
+summary(rm1)
+```
+then remove the variable with p_value smaller than 0.05, then the babysex, bhead, blength,delwt,gaweeks,mrace,parity,smoken retains. Next, re-fit the model with above fitered variables.
+
+```{r}
+rm1_1=lm(bwt~babysex+bhead+blength+delwt+gaweeks+mrace+parity+smoken,data=child_weight)
+summary(rm1_1)
+```
+We find all variables in this model is significant.
+That is what I will use.
+
+
